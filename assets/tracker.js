@@ -1,17 +1,29 @@
 var app = new Vue({
     el: '#app',
     data: {
-        timeout: 5000
+        timeout: 3 * 60 * 60,
+        stats: {
+            kills: 0,
+            wins: 0,
+            kdr: 0.0
+        }
     },
+    
     created: function(){
         this.start();
     },
     methods:{
         start: function(){
-            console.log(`starting`)
+            this.getData();
             setTimeout(function(){
-                window.location.reload(1);
+               app.getData();
             }, this.timeout);
+        },
+        getData: function(){
+            axios.get(`http://localhost:8000/obs/laughingcabbage`)
+            .then(response => {
+                this.stats = response.data
+            })
         }
     }
 })

@@ -1,14 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
-
 	tracker "github.com/LaughingCabbage/fortnite-tracker/v1"
 	"github.com/LaughingCabbage/tracker-bot/key"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -16,15 +16,16 @@ func main() {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/obs/fortnite.html", handleFortniteData)
+	router.HandleFunc("/obs/laughingcabbage", handleFortniteData)
 	router.PathPrefix("/obs/assets/").Handler(http.StripPrefix("/obs/assets/", http.FileServer(http.Dir("assets"))))
-	log.Println(templates.DefinedTemplates())
-
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
-type wins struct {
-	Value int
+// Data holds response data to serve as json
+type Data struct {
+	Wins  int     `json:"wins"`
+	KDR   float64 `json:"kdr"`
+	Kills int     `json:"kills"`
 }
 
 func handleFortniteData(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +34,26 @@ func handleFortniteData(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	data := Data{}
 
-	winCount, err := tracker.GetWins(profile)
+	kills, err := tracker.GetKills(profile)
+	handleError(err)
+	data.Kills = kills
+
+	wins, err := tracker.GetWins(profile)
+	handleError(err)
+	data.Wins = wins
+
+	kdr, err := tracker.GetKDR(profile)
+	handleError(err)
+	data.KDR = kdr
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+
+func handleError(err error) {
 	if err != nil {
 		panic(err)
 	}
-
-	renderTemplate(w, "fortnite", wins{Value: winCount})
 }
