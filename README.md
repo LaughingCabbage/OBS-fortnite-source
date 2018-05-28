@@ -1,2 +1,2 @@
-# OBS-github-source
-Browser source for OBS Studio intended to display a live feed of GitHub account data
+# OBS-fortnite-source
+Browser source for OBS Studio intended to display a live feed of FortniteTracker account data
