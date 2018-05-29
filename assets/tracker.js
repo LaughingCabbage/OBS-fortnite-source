@@ -1,7 +1,7 @@
 var app = new Vue({
     el: '#app',
     data: {
-        timeout: 3 * 60 * 60,
+        interval: 60000,
         stats: {
             kills: 0,
             wins: 0,
@@ -14,16 +14,18 @@ var app = new Vue({
     },
     methods:{
         start: function(){
-            this.getData();
-            setTimeout(function(){
-               app.getData();
-            }, this.timeout);
+            var self = this;
+            self.getData();
+            setInterval(function(){
+                self.getData();
+            }, this.interval);
         },
         getData: function(){
+            var self = this;
             axios.get(`http://localhost:8000/obs/laughingcabbage`)
             .then(response => {
-                this.stats = response.data
-            })
+                self.stats = response.data;
+            });
         }
     }
 })
